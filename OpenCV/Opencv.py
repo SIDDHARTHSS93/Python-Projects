@@ -2,6 +2,7 @@
 import cv2
 import numpy as np
 import datetime
+import matplotlib.pyplot as plt
 print(cv2.__version__)
 
 # Read And Write Images
@@ -230,3 +231,99 @@ while(True):
         break
 cv2.destroyAllWindows()
 cap2.release()
+
+# Image Tresholding
+
+
+grad=cv2.imread('gradient.png',1)
+ret1, th1=cv2.threshold(grad,127,255,cv2.THRESH_BINARY)
+_, th2=cv2.threshold(grad,127,255,cv2.THRESH_BINARY_INV)
+_, th3=cv2.threshold(grad,127,255,cv2.THRESH_TRUNC)
+_, th4=cv2.threshold(grad,127,255,cv2.THRESH_TOZERO)
+_, th5=cv2.threshold(grad,127,255,cv2.THRESH_TOZERO_INV)  
+cv2.imshow('Gradient',grad) 
+cv2.imshow('TBGradient',th1) # All pixels below threshold will be 0 and above threshold 1 
+cv2.imshow('TBIGradient',th2) # All pixels below threshold will be 1 and above threshold 0
+cv2.imshow('TTGradient',th3) # All pixels below threshold will remain unchanged and above threshold will be same pixel value as threshold
+cv2.imshow('TZGradient',th4) # All pixels below threshold will be 0 and above threshold will remain unchanged
+cv2.imshow('TZIGradient',th5) # All pixels below threshold will trmain unchanged and above threshold 0
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+# Adaptive thresholding
+
+sudoku=cv2.imread('sudoku.png',0)
+ret1, th1=cv2.threshold(sudoku,127,255,cv2.THRESH_BINARY)
+th2=cv2.adaptiveThreshold(sudoku,255,cv2.ADAPTIVE_THRESH_MEAN_C,cv2.THRESH_BINARY,11,2)
+th3=cv2.adaptiveThreshold(sudoku,255,cv2.ADAPTIVE_THRESH_GAUSSIAN_C,cv2.THRESH_BINARY,11,2)
+cv2.imshow('Sudoku', sudoku)
+cv2.imshow('Normal Thresholding', th1) # Binary Thresholding
+cv2.imshow('MAT', th2)  # Adaptive thresholding on many regions where thresholding is decided upon mean of pixel values in the region along a value c
+cv2.imshow('GAT', th3) # Adaptive thresholding on many regions where thresholding is decided upon Weighted Gaussian mean of pixel values in the region along a value c
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
+
+# Matplotlib
+
+lena=cv2.imread('lena.jpg',1)
+cv2.imshow('Lena', lena)
+lena=cv2.cvtColor(lena, cv2.COLOR_BGR2RGB)
+
+plt.imshow(lena)
+#plt.xticks([]),plt.yticks([])
+plt.show() 
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
+grad=cv2.imread('gradient.png',0)
+ret1, th1=cv2.threshold(grad,127,255,cv2.THRESH_BINARY)
+_, th2=cv2.threshold(grad,127,255,cv2.THRESH_BINARY_INV)
+_, th3=cv2.threshold(grad,127,255,cv2.THRESH_TRUNC)
+_, th4=cv2.threshold(grad,127,255,cv2.THRESH_TOZERO)
+_, th5=cv2.threshold(grad,127,255,cv2.THRESH_TOZERO_INV)  
+
+titles=['Gradient','TBGradient','TBIGradient','TTGradient','TZGradient','TZIGradient']
+imgs=[grad,th1,th2,th3,th4,th5]
+
+for i in range(6):
+    plt.subplot(2,3,i+1),plt.imshow(imgs[i],'gray')
+    plt.title(titles[i])
+    plt.xticks([]),plt.yticks([])
+#cv2.imshow('Gradient',grad) 
+#cv2.imshow('TBGradient',th1) # All pixels below threshold will be 0 and above threshold 1 
+#cv2.imshow('TBIGradient',th2) # All pixels below threshold will be 1 and above threshold 0
+#cv2.imshow('TTGradient',th3) # All pixels below threshold will remain unchanged and above threshold will be same pixel value as threshold
+#cv2.imshow('TZGradient',th4) # All pixels below threshold will be 0 and above threshold will remain unchanged
+#cv2.imshow('TZIGradient',th5) # All pixels below threshold will trmain unchanged and above threshold 0
+plt.savefig('Thresholding.jpg')
+plt.show()
+#cv2.waitKey(0)
+#cv2.destroyAllWindows()
+
+
+# Morphological Transformations in OpenCV
+
+smart=cv2.imread('smarties.png',0) 
+_,mask=cv2.threshold(smart,220,255,cv2.THRESH_BINARY_INV) # Binary Threshold value
+kernel=np.ones((5,5),np.uint8) # A sliding window that compares its values with small portions of the image values
+dilation=cv2.dilate(mask,kernel,iterations=2) # if all pixels under kernel are atleast 1 then pixels will light up 
+erosion=cv2.erode(mask,kernel,iterations=2) # If all pixels under kernel are 1 only then pixel will be made 1
+opening=cv2.morphologyEx(mask,cv2.MORPH_OPEN,kernel) #first erosion is carried out then dilation over erosion
+closing=cv2.morphologyEx(mask,cv2.MORPH_CLOSE,kernel) # first dilation is carried out followed by erosion
+mg=cv2.morphologyEx(mask,cv2.MORPH_GRADIENT,kernel) # dilatipon-erosion
+th=cv2.morphologyEx(mask,cv2.MORPH_TOPHAT,kernel) # Original image-opening
+
+
+titles=['Smart','Mask','Dilation','Erosion','Opening','Closing','Gradient','Top Hat']
+imgs=[smart,mask, dilation,erosion,opening,closing,mg,th]
+
+for i in range(8):
+    plt.subplot(2,4,i+1),plt.imshow(imgs[i],'gray')
+    plt.title(titles[i])
+    plt.xticks([]),plt.yticks([])
+plt.savefig('Morphology.jpg')
+plt.show()
