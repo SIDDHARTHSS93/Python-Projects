@@ -43,7 +43,7 @@ window.mathjax_url = "/static/components/MathJax/MathJax.js";
     <script>
       require.config({
           
-          urlArgs: "v=20201129223740",
+          urlArgs: "v=20201130130154",
           
           baseUrl: '/static/',
           paths: {
@@ -132,7 +132,7 @@ window.mathjax_url = "/static/components/MathJax/MathJax.js";
 
 
   
-    data-jupyter-api-token="e7d010ae76b7b57a855665b3bdb788924d5be5b0bba3c567"
+    data-jupyter-api-token="293d9f9474620a42c06d88403cae6e5783986c47450d53df"
   
  
 data-base-url="/"
@@ -151,7 +151,7 @@ dir="ltr">
 
 <div id="header" role="navigation" aria-label="Top Menu">
   <div id="header-container" class="container">
-  <div id="ipython_notebook" class="nav navbar-brand"><a href="/tree?token=e7d010ae76b7b57a855665b3bdb788924d5be5b0bba3c567" title='dashboard'>
+  <div id="ipython_notebook" class="nav navbar-brand"><a href="/tree?token=293d9f9474620a42c06d88403cae6e5783986c47450d53df" title='dashboard'>
       <img src='/static/base/images/logo.png?v=a2a176ee3cee251ffddf5fa21fe8e43727a9e5f87a06f9c91ad7b776d9e9d3d5e0159c16cc188a3965e00375fb4bc336c16067c688f5040c0c2d4bfdb852a9e4' alt='Jupyter Notebook'/>
   </a></div>
 
