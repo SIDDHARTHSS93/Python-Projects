@@ -327,3 +327,115 @@ for i in range(8):
     plt.xticks([]),plt.yticks([])
 plt.savefig('Morphology.jpg')
 plt.show()
+
+
+
+# Smoothening and Blurring Of Images
+
+logo=cv2.imread('opencv-logo.png')
+water=cv2.imread('water.png')
+lena=cv2.imread('lena.jpg')
+
+
+lena=cv2.cvtColor(lena,cv2.COLOR_BGR2RGB) 
+
+kernel=np.ones((5,5),np.float32)/25
+homog=cv2.filter2D(lena,-1,kernel)
+blur=cv2.blur(lena,(5,5))
+gblur=cv2.GaussianBlur(lena,(5,5),0)
+mblur=cv2.medianBlur(lena,5)
+bfilter=cv2.bilateralFilter(lena,9,75,75)
+titles=['Lena','2D Filtering','Blurring','Gaussian Blur','Median Blur','Bilateral Filter']
+imgs=[lena,homog,blur,gblur,mblur,bfilter]
+
+for i in range(6):
+    plt.subplot(2,3,i+1),plt.imshow(imgs[i],'gray')
+    plt.title(titles[i])
+    plt.xticks([]),plt.yticks([])
+plt.savefig('Filters.jpg')
+plt.show()
+
+# Image Gradients
+
+messi=cv2.imread('messi5.jpg',0)
+sudoku=cv2.imread('sudoku.png',0)
+lap=cv2.Laplacian(sudoku,cv2.CV_64F,ksize=3)
+lap=np.uint8(np.absolute(lap))
+sobelx=cv2.Sobel(sudoku,cv2.CV_64F,1,0)
+sobely=cv2.Sobel(sudoku,cv2.CV_64F,0,1)
+
+sobelx=np.uint8(np.absolute(sobelx))
+sobely=np.uint8(np.absolute(sobely))
+
+sobelxy=cv2.bitwise_or(sobelx,sobely)
+
+titles=['Sudoku','Laplacian Gradient','SobelX Gradient','SobelY Gradient','SobelXY Gradient']
+imgs=[sudoku,lap,sobelx,sobely,sobelxy]
+
+for i in range(5):
+    plt.subplot(2,3,i+1),plt.imshow(imgs[i],'gray')
+    plt.title(titles[i])
+    plt.xticks([]),plt.yticks([])
+plt.savefig('Image Gradients.jpg')
+plt.show()
+
+
+# Canny Edge Detectors Using Open CV
+
+messi=cv2.imread('messi5.jpg',0)
+canny=cv2.Canny(messi,100,200)
+lap=cv2.Laplacian(messi,cv2.CV_64F,ksize=3)
+lap=np.uint8(np.absolute(lap))
+sobelx=cv2.Sobel(messi,cv2.CV_64F,1,0)
+sobely=cv2.Sobel(messi,cv2.CV_64F,0,1)
+
+sobelx=np.uint8(np.absolute(sobelx))
+sobely=np.uint8(np.absolute(sobely))
+
+sobelxy=cv2.bitwise_or(sobelx,sobely)
+
+titles=['Messi','Laplacian Gradient','SobelX Gradient','SobelY Gradient','SobelXY Gradient','Canny']
+imgs=[messi,lap,sobelx,sobely,sobelxy,canny]
+
+for i in range(6):
+    plt.subplot(2,3,i+1),plt.imshow(imgs[i],'gray')
+    plt.title(titles[i])
+    plt.xticks([]),plt.yticks([])
+plt.savefig('Canny.jpg')
+plt.show()
+
+
+# Image Pyramids
+
+lena=cv2.imread('lena.jpg')
+lc=lena.copy()
+
+gp=[lc]
+
+for i in range(6):
+    lc=cv2.pyrDown(lc)
+    gp.append(lc)
+    #cv2.imshow(str(i),lc)
+
+layer=gp[5]
+cv2.imshow('Top Layer Gaussian Pyramid',layer)
+lp=[layer]
+
+for i in range(5,0,-1):
+    gaussian_extended=cv2.pyrUp(gp[i])
+    laplacian=cv2.subtract(gp[i-1],gaussian_extended)
+    cv2.imshow(str(i),laplacian)
+
+#lr1=cv2.pyrDown(lena)
+#lr2=cv2.pyrDown(lr1)
+#hr2=cv2.pyrUp(lr2)
+#cv2.imshow('Original',lena)
+#cv2.imshow('Scaled Down1',lr1)
+#cv2.imshow('Scaled Down2',lr2)
+#cv2.imshow('Scaled Up2',hr2)
+
+cv2.waitKey(0)
+
+cv2.destroyAllWindows()
+
+
