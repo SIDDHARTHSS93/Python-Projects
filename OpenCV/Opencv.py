@@ -438,4 +438,161 @@ cv2.waitKey(0)
 
 cv2.destroyAllWindows()
 
+#Image Blending
 
+# For perfect Image Blending Follow  the Below Steps
+#1. Load the 2 Images
+#2. Generate Gaussian Pyramid of the 2 images at a deep level say 6
+#3. Generate the Laplacian Pyramid for the 2 images
+#4. Join the halves of the 2 images at each level
+#5. Rconstruct the image to get the blended output 
+
+#Loading the 2 images as per step 1
+apple=cv2.imread('apple.jpg')
+orange=cv2.imread('orange.jpg')
+print(apple.shape)
+print(orange.shape)
+
+appleorange=np.hstack((apple[:,:256],orange[:,256:]))
+
+# Generating Gaussian Pyramid as per step 2 
+apple_copy=apple.copy()
+gp_apple=[apple_copy]
+orange_copy=orange.copy()
+gp_orange=[orange_copy]
+
+
+for i in range(6):
+    apple_copy=cv2.pyrDown(apple_copy)
+    gp_apple.append(apple_copy)
+
+    orange_copy=cv2.pyrDown(orange_copy)
+    gp_orange.append(orange_copy)
+
+# Generating the Laplacian Pyramid as per step 3
+
+apple_copy=gp_apple[5]
+lp_apple=[apple_copy]
+
+orange_copy=gp_orange[5]
+lp_orange=[orange_copy]
+
+
+for i in range(5,0,-1):
+    gaussian_expanded_apple=cv2.pyrUp(gp_apple[i])
+    laplacian_apple=cv2.subtract(gp_apple[i-1],gaussian_expanded_apple)
+    lp_apple.append(laplacian_apple)
+
+
+    gaussian_expanded_orange=cv2.pyrUp(gp_orange[i])
+    laplacian_orange=cv2.subtract(gp_orange[i-1],gaussian_expanded_orange)
+    lp_orange.append(laplacian_orange)
+
+# Joining the 2 halves as per step 4
+apple_orange_pyramid=[]
+n=0
+for app_lap,or_lap in zip(lp_apple,lp_orange):
+    n+=1
+    cols,row,ch=app_lap.shape 
+    lap=np.hstack((app_lap[:,:int(cols/2)],or_lap[:,int(cols/2):]))
+    apple_orange_pyramid.append(lap)
+
+# Reconstruct the image as per step 5
+
+apple_orange_reconstruct=apple_orange_pyramid[0]
+for i in range(1,6):
+    apple_orange_reconstruct=cv2.pyrUp(apple_orange_reconstruct)
+    apple_orange_reconstruct=cv2.add(apple_orange_pyramid[i],apple_orange_reconstruct)
+
+
+cv2.imshow('Apple',apple)
+cv2.imshow('Orange',orange)
+
+cv2.imshow('Apple Orange',appleorange)
+cv2.imshow('Blended Apple and Orange',apple_orange_reconstruct)
+cv2.waitKey(0)
+
+cv2.destroyAllWindows()
+
+# Contours in OpenCV
+
+opencv=cv2.imread('opencv-logo.png')
+gray=cv2.cvtColor(opencv,cv2.COLOR_BGR2GRAY)
+
+ret,thresh=cv2.threshold(gray,0,255,0)
+contours,hierarchy=cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
+print(str(len(contours)))
+cv2.drawContours(opencv,contours,3,(255,0,0),7)
+cv2.imshow('Open CV Logo',opencv)
+#cv2.imshow('Gray Image',gray)
+cv2.waitKey(0)
+
+cv2.destroyAllWindows()
+
+
+# Motion Tracking
+
+cap=cv2.VideoCapture('vtest.avi')
+ret,frame1=cap.read()
+ret,frame2=cap.read()
+while cap.isOpened():
+    diff=cv2.absdiff(frame1,frame2)
+    gray=cv2.cvtColor(diff,cv2.COLOR_BGR2GRAY)
+    blur=cv2.GaussianBlur(gray,(5,5),0)
+    _,thresh=cv2.threshold(blur,20,255,cv2.THRESH_BINARY)
+    dilated=cv2.dilate(thresh,None, iterations=3)
+    contours,hierarchy=cv2.findContours(dilated,cv2.RETR_TREE,cv2.CHAIN_APPROX_SIMPLE)
+    for contour in contours:
+        (x,y,w,h)=cv2.boundingRect(contour)
+        if cv2.contourArea(contour)<2000:
+            continue
+        
+        cv2.rectangle(frame1,(x,y),(x+w,y+h),(0,255,255),2)
+        cv2.putText(frame1,'Status: {}'.format('Movement'),(10,20),cv2.FONT_HERSHEY_SIMPLEX,1,(0,255,0),3)
+    #cv2.drawContours(frame1,contours,-1,(0,255,255),2)
+    cv2.imshow('Motion Video',frame1)
+    frame1=frame2
+    ret,frame2=cap.read()
+    if cv2.waitKey(1)==ord('q'):
+        break
+cv2.destroyAllWindows()
+cap.release()
+
+
+# Object Detection of Geometric Shapes
+
+shapes=cv2.imread('shapes.jpg')
+gray=cv2.cvtColor(shapes,cv2.COLOR_BGR2GRAY)
+_,thresh=cv2.threshold(gray,240,255,cv2.THRESH_BINARY)
+contours,_=cv2.findContours(thresh,cv2.RETR_TREE,cv2.CHAIN_APPROX_NONE)
+for contour in contours:
+    approx=cv2.approxPolyDP(contour,0.01*cv2.arcLength(contour,True), True)
+    cv2.drawContours(shapes,[approx],0,(255,0,0),3)
+    x=approx.ravel()[0]
+    y=approx.ravel()[1]
+    
+    if(len(approx)==3):
+        cv2.putText(shapes,'Triangle',(x,y-10),cv2.FONT_HERSHEY_SIMPLEX,0.3,(0,0,0),1)        
+    elif(len(approx)==4):
+        x,y,w,h=cv2.boundingRect(approx)
+        aspect=float(w)/h
+        if aspect>0.95 and aspect<1.05:
+            cv2.putText(shapes,'Square',(x,y-5),cv2.FONT_HERSHEY_SIMPLEX,0.3,(0,0,0),1)
+        else: 
+            cv2.putText(shapes,'Rectangle',(x,y-5),cv2.FONT_HERSHEY_SIMPLEX,0.3,(0,0,0),1)        
+
+    elif(len(approx)==5):
+        cv2.putText(shapes,'Pentagon',(x,y-5),cv2.FONT_HERSHEY_SIMPLEX,0.3,(0,0,0),1)        
+    
+    elif(len(approx)==6):
+        cv2.putText(shapes,'Hexagon',(x,y-5),cv2.FONT_HERSHEY_SIMPLEX,0.3,(0,0,0),1)        
+
+    else:
+        cv2.putText(shapes,'Circle',(x,y-5),cv2.FONT_HERSHEY_SIMPLEX,0.3,(0,0,0),1)        
+
+
+cv2.imshow('Shapes',shapes)
+
+cv2.waitKey(0)
+
+cv2.destroyAllWindows()
